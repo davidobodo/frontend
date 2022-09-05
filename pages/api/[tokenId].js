@@ -1,12 +1,17 @@
 export default function handler(req, res) {
 	const tokenId = req.query.tokenId;
 
-	const image_url =
-		"https://images.unsplash.com/photo-1662315317572-f797a4325b57?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwyfHx8ZW58MHx8fHw%3D&auto=format&fit=crop&w=500&q=60";
+	const NFT_IMAGE_URLS = [
+		"https://asset.cloudinary.com/phitgeek/b0b9684ff47e9adaa2abceecfbbd64de",
+		"https://asset.cloudinary.com/phitgeek/63e6346513f6dbe7114fa6cd86a6db8d",
+		"https://asset.cloudinary.com/phitgeek/2d5abcc4d0e57368f13bfad9e91a452e",
+		"https://asset.cloudinary.com/phitgeek/e7ad1f006aeadaa03f217dc6fd7f84c5",
+		"https://asset.cloudinary.com/phitgeek/449045280c72c4d3a4a4635c0022059b",
+	];
 
 	res.status(200).json({
 		name: "Phit NFT #" + tokenId,
 		description: "Phit NFT is a clone of LEARN WEB3 Nft project",
-		image: image_url,
+		image: NFT_IMAGE_URLS[tokenId + 1],
 	});
 }
