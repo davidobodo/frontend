@@ -581,4 +581,4 @@ export const abi = [
 		type: "receive",
 	},
 ];
-export const PHIT_NFTS_CONTRACT_ADDRESS = "0x3a81bEeC1301bbf35f052B9978eF682c2da2AD1A";
+export const PHIT_NFTS_CONTRACT_ADDRESS = "0x8e2D49E91b0773a13654A58f3483eee9d33e0Da5";
