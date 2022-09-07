@@ -19,7 +19,9 @@ export default function handler(req, res) {
 
 	res.status(200).json({
 		name: "Phit NFT #" + tokenId,
-		description: "Phit NFT is a clone of LEARN WEB3 Nft project",
+		description: `Phit NFT is a clone of LEARN WEB3 Nft project. This is number ${tokenId} with image url ${
+			NFT_IMAGE_URLS[tokenId + 1]
+		}`,
 		image: NFT_IMAGE_URLS[tokenId + 1],
 	});
 }
