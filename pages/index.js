@@ -6,10 +6,9 @@ import { useEffect, useRef, useState } from "react";
 import Web3Modal from "web3modal";
 import { abi, PHIT_NFTS_CONTRACT_ADDRESS } from "../constants";
 import { useNftContractHelpers } from "../hooks/useNftContractHelpers";
+import { useEthProviderConnection } from "../hooks/useEthProviderConnection";
 
 export default function Home() {
-	const [isUsersWalletConnected, setIsUsersWalletConnected] = useState(false);
-
 	const web3ModalRef = useRef();
 
 	const instantiateContract = async (needSigner = false) => {
@@ -36,6 +35,9 @@ export default function Home() {
 		tokenIdsMinted,
 	} = useNftContractHelpers({ instantiateContract });
 
+	const { isUsersWalletConnected, hasMetamask, isCheckingProvider, checkIfUserHasProvider, connectedWallets } =
+		useEthProviderConnection();
+
 	const getProviderOrSigner = async (needSigner = false) => {
 		// Connect to Metamask
 		// Since we store `web3Modal` as a reference, we need to access the `current` value to get access to the underlying object
@@ -59,10 +61,18 @@ export default function Home() {
 	const connectWallet = async () => {
 		try {
 			await getProviderOrSigner();
-			setIsUsersWalletConnected(true);
 		} catch (err) {
-			console.error(err);
+			console.log(err, "THE ERROR WHEN CONNECTING TO WALLET");
 		}
+	};
+
+	const onConnectWallet = async () => {
+		if (!hasMetamask) {
+			alert("Error: Please install metamask and try again");
+			return;
+		}
+
+		connectWallet();
 	};
 
 	useEffect(() => {
@@ -72,28 +82,39 @@ export default function Home() {
 				providerOptions: {},
 				disableInjectedProvider: false,
 			});
-			connectWallet();
 
-			const _presaleStarted = checkIfPresaleStarted();
-			if (_presaleStarted) {
-				checkIfPresaleEnded();
-			}
+			const initApp = async () => {
+				try {
+					const provider = await checkIfUserHasProvider();
+					if (provider) {
+						connectWallet();
 
-			getTokenIdsMinted();
+						const _presaleStarted = checkIfPresaleStarted();
+						if (_presaleStarted) {
+							checkIfPresaleEnded();
+						}
 
-			const presaleEndedInterval = setInterval(async function () {
-				const _presaleStarted = await checkIfPresaleStarted();
-				if (_presaleStarted) {
-					const _presaleEnded = await checkIfPresaleEnded();
-					if (_presaleEnded) {
-						clearInterval(presaleEndedInterval);
+						getTokenIdsMinted();
+
+						const presaleEndedInterval = setInterval(async function () {
+							const _presaleStarted = await checkIfPresaleStarted();
+							if (_presaleStarted) {
+								const _presaleEnded = await checkIfPresaleEnded();
+								if (_presaleEnded) {
+									clearInterval(presaleEndedInterval);
+								}
+							}
+						}, 5 * 1000);
+
+						setInterval(async function () {
+							await getTokenIdsMinted();
+						}, 5 * 1000);
 					}
+				} catch (err) {
+					console.log(err);
 				}
-			}, 5 * 1000);
-
-			setInterval(async function () {
-				await getTokenIdsMinted();
-			}, 5 * 1000);
+			};
+			initApp();
 		}
 	}, [isUsersWalletConnected]);
 
@@ -173,12 +194,17 @@ export default function Home() {
 						</a>
 					</p>
 
-					<p>Connected wallet: </p>
+					<section>
+						<h2>Connected wallets</h2>
+						<ul>
+							{connectedWallets.map((item) => {
+								return <li key={item}>{item}</li>;
+							})}
+						</ul>
+					</section>
 				</div>
 				<div>{/* <img className={styles.image} src="./cryptodevs/0.svg" /> */}</div>
 			</div>
-
-			<footer className={styles.footer}>Made with &#10084; by Crypto Devs</footer>
 		</div>
 	);
 }
