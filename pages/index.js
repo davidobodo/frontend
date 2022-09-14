@@ -5,16 +5,36 @@ import { Contract, providers, utils } from "ethers";
 import { useEffect, useRef, useState } from "react";
 import Web3Modal from "web3modal";
 import { abi, PHIT_NFTS_CONTRACT_ADDRESS } from "../constants";
+import { useNftContractHelpers } from "../hooks/useNftContractHelpers";
 
 export default function Home() {
 	const [isUsersWalletConnected, setIsUsersWalletConnected] = useState(false);
-	const [presaleStarted, setPresaleStarted] = useState(false);
-	const [presaleEnded, setPresaleEnded] = useState(false);
-	const [loading, setLoading] = useState(false);
-	const [isOwner, setIsOwner] = useState(false);
 
-	const [tokenIdsMinted, setTokenIdsMinted] = useState(0);
 	const web3ModalRef = useRef();
+
+	const instantiateContract = async (needSigner = false) => {
+		const signer = await getProviderOrSigner(needSigner);
+		const contract = new Contract(PHIT_NFTS_CONTRACT_ADDRESS, abi, signer);
+
+		return {
+			signer,
+			contract,
+		};
+	};
+
+	const {
+		presaleMint,
+		publicMint,
+		startPresale,
+		checkIfPresaleEnded,
+		getTokenIdsMinted,
+		checkIfPresaleStarted,
+		presaleEnded,
+		presaleStarted,
+		loading,
+		isOwner,
+		tokenIdsMinted,
+	} = useNftContractHelpers({ instantiateContract });
 
 	const getProviderOrSigner = async (needSigner = false) => {
 		// Connect to Metamask
@@ -36,127 +56,10 @@ export default function Home() {
 		return web3Provider;
 	};
 
-	const presaleMint = async () => {
-		try {
-			const signer = await getProviderOrSigner(true);
-			const whitelistContract = new Contract(PHIT_NFTS_CONTRACT_ADDRESS, abi, signer);
-			const tx = await whitelistContract.presaleMint({
-				//Cost of one phitnft is 0.01eth
-				value: utils.parseEther("0.01"),
-			});
-			setLoading(true);
-			await tx.wait();
-			setLoading(false);
-			window.alert("You successfully minted a Phit NFT");
-		} catch (err) {
-			console.error(err);
-		}
-	};
-
-	const publicMint = async () => {
-		try {
-			const signer = await getProviderOrSigner(true);
-			const whitelistContract = new Contract(PHIT_NFTS_CONTRACT_ADDRESS, abi, signer);
-			const tx = await whitelistContract.mint({
-				value: utils.parseEther("0.01"),
-			});
-			setLoading(true);
-			// wait for the transaction to get mined
-			await tx.wait();
-			setLoading(false);
-			window.alert("You successfully minted a Phit NFT");
-		} catch (err) {
-			console.error(err);
-		}
-	};
-
 	const connectWallet = async () => {
 		try {
 			await getProviderOrSigner();
 			setIsUsersWalletConnected(true);
-		} catch (err) {
-			console.error(err);
-		}
-	};
-
-	const startPresale = async () => {
-		try {
-			const signer = await getProviderOrSigner(true);
-
-			const whitelistContract = new Contract(PHIT_NFTS_CONTRACT_ADDRESS, abi, signer);
-			const tx = await whitelistContract.startPresale();
-			setLoading(true);
-			// wait for the transaction to get mined
-			await tx.wait();
-			setLoading(false);
-
-			await checkIfPresaleStarted();
-		} catch (err) {
-			console.error(err);
-		}
-	};
-
-	const checkIfPresaleStarted = async () => {
-		try {
-			//Since we are just reading
-			const provider = await getProviderOrSigner();
-			const whitelistContract = new Contract(PHIT_NFTS_CONTRACT_ADDRESS, abi, provider);
-
-			const _presaleStarted = await whitelistContract.presaleStarted();
-			if (!_presaleStarted) {
-				await getOwner();
-			}
-
-			setPresaleStarted(_presaleStarted);
-			return _presaleStarted;
-		} catch (err) {
-			console.error(err);
-			return false;
-		}
-	};
-
-	const checkIfPresaleEnded = async () => {
-		try {
-			const provider = await getProviderOrSigner();
-			const whitelistContract = new Contract(PHIT_NFTS_CONTRACT_ADDRESS, abi, provider);
-			const _presaleEnded = await whitelistContract.presaleEnded();
-			const hasEnded = _presaleEnded.lt(Math.floor(Date.now() / 1000));
-			if (hasEnded) {
-				setPresaleEnded(true);
-			} else {
-				setPresaleEnded(false);
-			}
-			return hasEnded;
-		} catch (err) {
-			console.error(err);
-			return false;
-		}
-	};
-
-	const getOwner = async () => {
-		try {
-			const provider = await getProviderOrSigner();
-			const whitelistContract = new Contract(PHIT_NFTS_CONTRACT_ADDRESS, abi, provider);
-
-			const _owner = await whitelistContract.owner();
-			const signer = await getProviderOrSigner(true);
-
-			const address = await signer.getAddress();
-			if (address.toLowerCase() === _owner.toLowerCase()) {
-				setIsOwner(true);
-			}
-		} catch (err) {
-			console.error(err.message);
-		}
-	};
-
-	const getTokenIdsMinted = async () => {
-		try {
-			const provider = await getProviderOrSigner();
-			const whitelistContract = new Contract(PHIT_NFTS_CONTRACT_ADDRESS, abi, provider);
-
-			const _tokenIds = await whitelistContract.tokenIds();
-			setTokenIdsMinted(_tokenIds.toString());
 		} catch (err) {
 			console.error(err);
 		}
@@ -245,6 +148,10 @@ export default function Home() {
 		}
 	};
 
+	const generateLinkFromTokenId = (id) => {
+		return `https://testnets.opensea.io/assets/rinkeby/${PHIT_NFTS_CONTRACT_ADDRESS}/${id}`;
+	};
+
 	return (
 		<div className={styles.container}>
 			<Head>
@@ -258,6 +165,15 @@ export default function Home() {
 					<div className={styles.description}>Its an NFT collection.</div>
 					<div className={styles.description}>{tokenIdsMinted}/20 have been minted</div>
 					{renderButton()}
+
+					<p>
+						See your NFT{" "}
+						<a href={generateLinkFromTokenId("1")} target="_blank">
+							here
+						</a>
+					</p>
+
+					<p>Connected wallet: </p>
 				</div>
 				<div>{/* <img className={styles.image} src="./cryptodevs/0.svg" /> */}</div>
 			</div>
