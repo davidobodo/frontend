@@ -1,3 +1,5 @@
+import { Button } from "../.";
+
 export default function CallToAction({
 	isUsersWalletConnected,
 	connectWallet,
@@ -10,15 +12,15 @@ export default function CallToAction({
 	publicMint,
 }) {
 	if (!isUsersWalletConnected) {
-		return <button onClick={connectWallet}>Connect your wallet</button>;
+		return <Button onClick={connectWallet}>Connect your wallet</Button>;
 	}
 
 	if (loading) {
-		return <button>Loading...</button>;
+		return <Button>Loading...</Button>;
 	}
 
 	if (isOwner && !presaleStarted) {
-		return <button onClick={startPresale}>Start Presale !</button>;
+		return <Button onClick={startPresale}>Start Presale !</Button>;
 	}
 
 	if (!presaleStarted) {
@@ -33,12 +35,14 @@ export default function CallToAction({
 		return (
 			<div>
 				<div>Presale has started!!! If your address is whitelisted, Mint a PHIT NFT 🥳</div>
-				<button onClick={presaleMint}>Presale Mint 🚀</button>
+				<Button onClick={presaleMint}>Presale Mint 🚀</Button>
 			</div>
 		);
 	}
 
 	if (presaleStarted && presaleEnded) {
-		return <button onClick={publicMint}>Public Mint 🚀</button>;
+		return <Button onClick={publicMint}>Public Mint 🚀</Button>;
 	}
+
+	//If you have minted an nft show link to the minted nft, cause users should only be able to mint just one nft for now
 }

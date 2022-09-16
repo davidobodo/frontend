@@ -5,7 +5,7 @@ import Web3Modal from "web3modal";
 import { abi, PHIT_NFTS_CONTRACT_ADDRESS } from "../constants";
 import { useNftContractHelpers } from "../hooks/useNftContractHelpers";
 import { useEthProviderConnection } from "../hooks/useEthProviderConnection";
-import { CallToAction } from "../components";
+import { CallToAction, Loader } from "../components";
 const styles = {};
 
 export default function Home() {
@@ -20,8 +20,6 @@ export default function Home() {
 		web3ModalRef,
 	} = useEthProviderConnection();
 
-	console.log(isCheckingProvider, " IS CHECKING PROVIDER");
-
 	const {
 		presaleMint,
 		publicMint,
@@ -34,6 +32,8 @@ export default function Home() {
 		loading,
 		isOwner,
 		tokenIdsMinted,
+		isStartingPresale,
+		isMintingNft,
 	} = useNftContractHelpers({ instantiateContract, getProviderOrSigner });
 
 	const connectWallet = async () => {
@@ -100,20 +100,23 @@ export default function Home() {
 		}
 	}, [isUsersWalletConnected]);
 
-	console.log(isOwner, "IS OWNER");
-
 	const generateLinkFromTokenId = (id) => {
 		return `https://testnets.opensea.io/assets/rinkeby/${PHIT_NFTS_CONTRACT_ADDRESS}/${id}`;
 	};
 
 	return (
-		<div className="bg-black min-h-screen relative">
+		<div className="bg-black min-h-screen relative text-white">
 			<Head>
 				<title>PHIT NFTS</title>
 				<meta name="description" content="Phit Nfts" />
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
-			<div className={styles.main}>
+			<div>
+				<FullLoader
+					isCheckingProvider={isCheckingProvider}
+					isStartingPresale={isStartingPresale}
+					isMintingNft={isMintingNft}
+				/>
 				<div>
 					<h1 className={styles.title}>Welcome to Phit Nfts!</h1>
 					<div className={styles.description}>Its an NFT collection.</div>
@@ -149,4 +152,26 @@ export default function Home() {
 			</div>
 		</div>
 	);
+}
+
+function FullLoader({ isCheckingProvider, isStartingPresale, isMintingNft }) {
+	const show = isCheckingProvider || isStartingPresale || isMintingNft;
+
+	if (!show) return null;
+
+	let message = "";
+
+	if (isCheckingProvider) {
+		message = "Checking Eth Provider...";
+	}
+
+	if (isStartingPresale) {
+		message = "Starting Presale...";
+	}
+
+	if (isMintingNft) {
+		message = "Minting Nft...";
+	}
+
+	return <Loader text={message} />;
 }
