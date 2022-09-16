@@ -1,12 +1,13 @@
 import Head from "next/head";
 import Image from "next/image";
-import styles from "../styles/Home.module.css";
 import { Contract, providers, utils } from "ethers";
 import { useEffect, useRef, useState } from "react";
 import Web3Modal from "web3modal";
 import { abi, PHIT_NFTS_CONTRACT_ADDRESS } from "../constants";
 import { useNftContractHelpers } from "../hooks/useNftContractHelpers";
 import { useEthProviderConnection } from "../hooks/useEthProviderConnection";
+
+const styles = {};
 
 export default function Home() {
 	const web3ModalRef = useRef();
@@ -20,23 +21,6 @@ export default function Home() {
 			contract,
 		};
 	};
-
-	const {
-		presaleMint,
-		publicMint,
-		startPresale,
-		checkIfPresaleEnded,
-		getTokenIdsMinted,
-		checkIfPresaleStarted,
-		presaleEnded,
-		presaleStarted,
-		loading,
-		isOwner,
-		tokenIdsMinted,
-	} = useNftContractHelpers({ instantiateContract });
-
-	const { isUsersWalletConnected, hasMetamask, isCheckingProvider, checkIfUserHasProvider, connectedWallets } =
-		useEthProviderConnection();
 
 	const getProviderOrSigner = async (needSigner = false) => {
 		// Connect to Metamask
@@ -57,6 +41,23 @@ export default function Home() {
 		}
 		return web3Provider;
 	};
+
+	const {
+		presaleMint,
+		publicMint,
+		startPresale,
+		checkIfPresaleEnded,
+		getTokenIdsMinted,
+		checkIfPresaleStarted,
+		presaleEnded,
+		presaleStarted,
+		loading,
+		isOwner,
+		tokenIdsMinted,
+	} = useNftContractHelpers({ instantiateContract, getProviderOrSigner });
+
+	const { isUsersWalletConnected, hasMetamask, isCheckingProvider, checkIfUserHasProvider, connectedWallets } =
+		useEthProviderConnection();
 
 	const connectWallet = async () => {
 		try {
@@ -174,7 +175,7 @@ export default function Home() {
 	};
 
 	return (
-		<div className={styles.container}>
+		<div className="bg-black min-h-screen relative">
 			<Head>
 				<title>PHIT NFTS</title>
 				<meta name="description" content="Phit Nfts" />
@@ -203,7 +204,6 @@ export default function Home() {
 						</ul>
 					</section>
 				</div>
-				<div>{/* <img className={styles.image} src="./cryptodevs/0.svg" /> */}</div>
 			</div>
 		</div>
 	);
