@@ -222,36 +222,17 @@ export const abi = [
 	{
 		inputs: [
 			{
-				internalType: "uint256",
+				internalType: "address",
 				name: "",
-				type: "uint256",
+				type: "address",
 			},
 		],
 		name: "listOfAddressesThatHaveMinted",
 		outputs: [
 			{
-				internalType: "address",
-				name: "",
-				type: "address",
-			},
-		],
-		stateMutability: "view",
-		type: "function",
-	},
-	{
-		inputs: [
-			{
 				internalType: "uint256",
 				name: "",
 				type: "uint256",
-			},
-		],
-		name: "listOfAddressesThatHaveMintedLUT",
-		outputs: [
-			{
-				internalType: "address",
-				name: "",
-				type: "address",
 			},
 		],
 		stateMutability: "view",
@@ -619,4 +600,4 @@ export const abi = [
 		type: "receive",
 	},
 ];
-export const PHIT_NFTS_CONTRACT_ADDRESS = "0x391D9A63374C5Eb719b742b35799b19d23b2AA86";
+export const PHIT_NFTS_CONTRACT_ADDRESS = "0x864EC287eF39A1DE0445EA1Fb441b5EE7c83626F";

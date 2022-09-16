@@ -10,7 +10,12 @@ export default function CallToAction({
 	startPresale,
 	presaleMint,
 	publicMint,
+	usersTokenId,
+	generateLinkFromTokenId,
 }) {
+	if (usersTokenId) {
+		return <Button onClick={() => generateLinkFromTokenId(usersTokenId)}>View your NFT</Button>;
+	}
 	if (!isUsersWalletConnected) {
 		return <Button onClick={connectWallet}>Connect your wallet</Button>;
 	}

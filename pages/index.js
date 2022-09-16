@@ -34,7 +34,9 @@ export default function Home() {
 		tokenIdsMinted,
 		isStartingPresale,
 		isMintingNft,
-	} = useNftContractHelpers({ instantiateContract, getProviderOrSigner });
+		getUsersTokenIdMinted,
+		usersTokenId,
+	} = useNftContractHelpers({ instantiateContract, getProviderOrSigner, connectedWallets });
 
 	const connectWallet = async () => {
 		try {
@@ -97,11 +99,16 @@ export default function Home() {
 				}
 			};
 			initApp();
+		} else {
+			getUsersTokenIdMinted();
 		}
 	}, [isUsersWalletConnected]);
 
 	const generateLinkFromTokenId = (id) => {
-		return `https://testnets.opensea.io/assets/rinkeby/${PHIT_NFTS_CONTRACT_ADDRESS}/${id}`;
+		const url = `https://testnets.opensea.io/assets/rinkeby/${PHIT_NFTS_CONTRACT_ADDRESS}/${id}`;
+
+		const win = window.open(`${url}`, "_blank");
+		win.focus();
 	};
 
 	return (
@@ -131,6 +138,8 @@ export default function Home() {
 						startPresale={startPresale}
 						presaleMint={presaleMint}
 						publicMint={publicMint}
+						usersTokenId={usersTokenId}
+						generateLinkFromTokenId={generateLinkFromTokenId}
 					/>
 
 					{/* <p>

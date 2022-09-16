@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { utils } from "ethers";
-export function useNftContractHelpers({ instantiateContract, getProviderOrSigner }) {
+export function useNftContractHelpers({ instantiateContract, getProviderOrSigner, connectedWallets }) {
 	const [presaleStarted, setPresaleStarted] = useState(false);
 	const [presaleEnded, setPresaleEnded] = useState(false);
 	const [loading, setLoading] = useState(false);
@@ -10,6 +10,8 @@ export function useNftContractHelpers({ instantiateContract, getProviderOrSigner
 	const [isStartingPresale, setIsStartingPresale] = useState(false);
 
 	const [isMintingNft, setIsMintingNft] = useState(false);
+
+	const [usersTokenId, setUsersTokenId] = useState("");
 
 	const presaleMint = async () => {
 		setIsMintingNft(true);
@@ -24,6 +26,7 @@ export function useNftContractHelpers({ instantiateContract, getProviderOrSigner
 
 			setIsMintingNft(false);
 			window.alert("You successfully minted a Phit NFT");
+			getUsersTokenIdMinted();
 		} catch (err) {
 			console.error(err);
 		}
@@ -41,6 +44,7 @@ export function useNftContractHelpers({ instantiateContract, getProviderOrSigner
 			await tx.wait();
 			setLoading(false);
 			window.alert("You successfully minted a Phit NFT");
+			getUsersTokenIdMinted();
 		} catch (err) {
 			console.error(err);
 		}
@@ -65,14 +69,9 @@ export function useNftContractHelpers({ instantiateContract, getProviderOrSigner
 	const checkIfPresaleStarted = async () => {
 		try {
 			//Since we are just reading
-			const { signer, contract: whitelistContract } = await instantiateContract();
+			const { contract: whitelistContract } = await instantiateContract();
 
 			const _presaleStarted = await whitelistContract.presaleStarted();
-			// const mintedAddresses = await whitelistContract.listOfAddressesThatHaveMinted(1);
-			// const _mintedAddresses = await whitelistContract.listOfAddressesThatHaveMintedLUT("");
-
-			// console.log(mintedAddresses, "TEH MINTED ADDRESS");
-			// console.log(_mintedAddresses, "TEH MINTED ADDRESS");
 			if (!_presaleStarted) {
 				await getOwner();
 			}
@@ -115,6 +114,19 @@ export function useNftContractHelpers({ instantiateContract, getProviderOrSigner
 		}
 	};
 
+	const getUsersTokenIdMinted = async () => {
+		try {
+			const { contract: whitelistContract } = await instantiateContract();
+
+			const userAddress = connectedWallets[0];
+			const tokenId = await whitelistContract.listOfAddressesThatHaveMinted(userAddress);
+
+			setUsersTokenId(tokenId.toString());
+		} catch (err) {
+			console.error(err);
+		}
+	};
+
 	const getOwner = async () => {
 		try {
 			const { contract: whitelistContract } = await instantiateContract();
@@ -145,5 +157,7 @@ export function useNftContractHelpers({ instantiateContract, getProviderOrSigner
 		tokenIdsMinted,
 		isStartingPresale,
 		isMintingNft,
+		getUsersTokenIdMinted,
+		usersTokenId,
 	};
 }
