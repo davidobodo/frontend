@@ -1,46 +1,26 @@
 import Head from "next/head";
 import Image from "next/image";
-import { Contract, providers, utils } from "ethers";
 import { useEffect, useRef, useState } from "react";
 import Web3Modal from "web3modal";
 import { abi, PHIT_NFTS_CONTRACT_ADDRESS } from "../constants";
 import { useNftContractHelpers } from "../hooks/useNftContractHelpers";
 import { useEthProviderConnection } from "../hooks/useEthProviderConnection";
-
+import { CallToAction } from "../components";
 const styles = {};
 
 export default function Home() {
-	const web3ModalRef = useRef();
+	const {
+		isUsersWalletConnected,
+		hasMetamask,
+		isCheckingProvider,
+		checkIfUserHasProvider,
+		connectedWallets,
+		getProviderOrSigner,
+		instantiateContract,
+		web3ModalRef,
+	} = useEthProviderConnection();
 
-	const instantiateContract = async (needSigner = false) => {
-		const signer = await getProviderOrSigner(needSigner);
-		const contract = new Contract(PHIT_NFTS_CONTRACT_ADDRESS, abi, signer);
-
-		return {
-			signer,
-			contract,
-		};
-	};
-
-	const getProviderOrSigner = async (needSigner = false) => {
-		// Connect to Metamask
-		// Since we store `web3Modal` as a reference, we need to access the `current` value to get access to the underlying object
-		const provider = await web3ModalRef.current.connect();
-		const web3Provider = new providers.Web3Provider(provider);
-
-		// If user is not connected to the Rinkeby network, let them know and throw an error
-		const { chainId } = await web3Provider.getNetwork();
-		if (chainId !== 4) {
-			window.alert("Change the network to Rinkeby");
-			throw new Error("Change network to Rinkeby");
-		}
-
-		if (needSigner) {
-			const signer = web3Provider.getSigner();
-			return signer;
-		}
-		return web3Provider;
-	};
+	console.log(isCheckingProvider, " IS CHECKING PROVIDER");
 
 	const {
 		presaleMint,
@@ -55,9 +35,6 @@ export default function Home() {
 		isOwner,
 		tokenIdsMinted,
 	} = useNftContractHelpers({ instantiateContract, getProviderOrSigner });
-
-	const { isUsersWalletConnected, hasMetamask, isCheckingProvider, checkIfUserHasProvider, connectedWallets } =
-		useEthProviderConnection();
 
 	const connectWallet = async () => {
 		try {
@@ -75,6 +52,10 @@ export default function Home() {
 
 		connectWallet();
 	};
+
+	//----------------------------------------
+	//INITIALIZE APP
+	//----------------------------------------
 
 	useEffect(() => {
 		if (!isUsersWalletConnected) {
@@ -119,56 +100,7 @@ export default function Home() {
 		}
 	}, [isUsersWalletConnected]);
 
-	const renderButton = () => {
-		if (!isUsersWalletConnected) {
-			return (
-				<button onClick={connectWallet} className={styles.button}>
-					Connect your wallet
-				</button>
-			);
-		}
-
-		if (loading) {
-			return <button className={styles.button}>Loading...</button>;
-		}
-
-		if (isOwner && !presaleStarted) {
-			return (
-				<button className={styles.button} onClick={startPresale}>
-					Start Presale !
-				</button>
-			);
-		}
-
-		if (!presaleStarted) {
-			return (
-				<div>
-					<div className={styles.description}>Presale hasnt started!</div>
-				</div>
-			);
-		}
-
-		if (presaleStarted && !presaleEnded) {
-			return (
-				<div>
-					<div className={styles.description}>
-						Presale has started!!! If your address is whitelisted, Mint a PHIT NFT 🥳
-					</div>
-					<button className={styles.button} onClick={presaleMint}>
-						Presale Mint 🚀
-					</button>
-				</div>
-			);
-		}
-
-		if (presaleStarted && presaleEnded) {
-			return (
-				<button className={styles.button} onClick={publicMint}>
-					Public Mint 🚀
-				</button>
-			);
-		}
-	};
+	console.log(isOwner, "IS OWNER");
 
 	const generateLinkFromTokenId = (id) => {
 		return `https://testnets.opensea.io/assets/rinkeby/${PHIT_NFTS_CONTRACT_ADDRESS}/${id}`;
@@ -186,14 +118,24 @@ export default function Home() {
 					<h1 className={styles.title}>Welcome to Phit Nfts!</h1>
 					<div className={styles.description}>Its an NFT collection.</div>
 					<div className={styles.description}>{tokenIdsMinted}/20 have been minted</div>
-					{renderButton()}
+					<CallToAction
+						isUsersWalletConnected={isUsersWalletConnected}
+						connectWallet={connectWallet}
+						loading={loading}
+						presaleStarted={presaleStarted}
+						presaleEnded={presaleEnded}
+						isOwner={isOwner}
+						startPresale={startPresale}
+						presaleMint={presaleMint}
+						publicMint={publicMint}
+					/>
 
-					<p>
+					{/* <p>
 						See your NFT{" "}
 						<a href={generateLinkFromTokenId("1")} target="_blank">
 							here
 						</a>
-					</p>
+					</p> */}
 
 					<section>
 						<h2>Connected wallets</h2>

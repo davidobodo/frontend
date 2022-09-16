@@ -220,6 +220,44 @@ export const abi = [
 		type: "function",
 	},
 	{
+		inputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256",
+			},
+		],
+		name: "listOfAddressesThatHaveMinted",
+		outputs: [
+			{
+				internalType: "address",
+				name: "",
+				type: "address",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
+		inputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256",
+			},
+		],
+		name: "listOfAddressesThatHaveMintedLUT",
+		outputs: [
+			{
+				internalType: "address",
+				name: "",
+				type: "address",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+	},
+	{
 		inputs: [],
 		name: "maxTokenIds",
 		outputs: [
@@ -581,4 +619,4 @@ export const abi = [
 		type: "receive",
 	},
 ];
-export const PHIT_NFTS_CONTRACT_ADDRESS = "0xCEc77dc5A1346BC37EDc3128Bac662A3C3c03D05";
+export const PHIT_NFTS_CONTRACT_ADDRESS = "0x391D9A63374C5Eb719b742b35799b19d23b2AA86";

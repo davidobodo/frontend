@@ -1,6 +1,6 @@
 import { useState } from "react";
-
-export function useNftContractHelpers({ instantiateContract }) {
+import { utils } from "ethers";
+export function useNftContractHelpers({ instantiateContract, getProviderOrSigner }) {
 	const [presaleStarted, setPresaleStarted] = useState(false);
 	const [presaleEnded, setPresaleEnded] = useState(false);
 	const [loading, setLoading] = useState(false);
@@ -9,7 +9,8 @@ export function useNftContractHelpers({ instantiateContract }) {
 
 	const presaleMint = async () => {
 		try {
-			const { signer, contract: whitelistContract } = instantiateContract(true);
+			const { signer, contract: whitelistContract } = await instantiateContract(true);
+
 			const tx = await whitelistContract.presaleMint({
 				//Cost of one phitnft is 0.01eth
 				value: utils.parseEther("0.01"),
@@ -25,7 +26,7 @@ export function useNftContractHelpers({ instantiateContract }) {
 
 	const publicMint = async () => {
 		try {
-			const { signer, contract: whitelistContract } = instantiateContract(true);
+			const { signer, contract: whitelistContract } = await instantiateContract(true);
 
 			const tx = await whitelistContract.mint({
 				value: utils.parseEther("0.01"),
@@ -42,7 +43,7 @@ export function useNftContractHelpers({ instantiateContract }) {
 
 	const startPresale = async () => {
 		try {
-			const { signer, contract: whitelistContract } = instantiateContract(true);
+			const { signer, contract: whitelistContract } = await instantiateContract(true);
 
 			const tx = await whitelistContract.startPresale();
 			setLoading(true);
@@ -59,9 +60,15 @@ export function useNftContractHelpers({ instantiateContract }) {
 	const checkIfPresaleStarted = async () => {
 		try {
 			//Since we are just reading
-			const { signer, contract: whitelistContract } = instantiateContract();
+			const { signer, contract: whitelistContract } = await instantiateContract();
 
 			const _presaleStarted = await whitelistContract.presaleStarted();
+			// const mintedAddresses = await whitelistContract.listOfAddressesThatHaveMinted(1);
+			// const _mintedAddresses = await whitelistContract.listOfAddressesThatHaveMintedLUT("");
+
+			console.log(_presaleStarted, "TEH PRESALE HAS STARTED");
+			// console.log(mintedAddresses, "TEH MINTED ADDRESS");
+			// console.log(_mintedAddresses, "TEH MINTED ADDRESS");
 			if (!_presaleStarted) {
 				await getOwner();
 			}
@@ -76,7 +83,7 @@ export function useNftContractHelpers({ instantiateContract }) {
 
 	const checkIfPresaleEnded = async () => {
 		try {
-			const { signer, contract: whitelistContract } = instantiateContract();
+			const { signer, contract: whitelistContract } = await instantiateContract();
 
 			const _presaleEnded = await whitelistContract.presaleEnded();
 			const hasEnded = _presaleEnded.lt(Math.floor(Date.now() / 1000));
@@ -94,7 +101,7 @@ export function useNftContractHelpers({ instantiateContract }) {
 
 	const getTokenIdsMinted = async () => {
 		try {
-			const { signer, contract: whitelistContract } = instantiateContract();
+			const { contract: whitelistContract } = await instantiateContract();
 
 			const _tokenIds = await whitelistContract.tokenIds();
 
@@ -105,13 +112,15 @@ export function useNftContractHelpers({ instantiateContract }) {
 	};
 
 	const getOwner = async () => {
+		console.log("FIREING GET OWNER CONTRACT");
 		try {
-			const { contract: whitelistContract } = instantiateContract();
+			const { contract: whitelistContract } = await instantiateContract();
 
 			const _owner = await whitelistContract.owner();
 			const signer = await getProviderOrSigner(true);
 
 			const address = await signer.getAddress();
+			console.log(address, "TEH ADDRESS");
 			if (address.toLowerCase() === _owner.toLowerCase()) {
 				setIsOwner(true);
 			}
