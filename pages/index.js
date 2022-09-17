@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { PHIT_NFTS_CONTRACT_ADDRESS } from "../constants";
 import { useNftContractHelpers } from "../hooks/useNftContractHelpers";
 import { useEthProviderConnection } from "../hooks/useEthProviderConnection";
-import { CallToAction, Loader } from "../components";
+import { CallToAction, Loader, Particles } from "../components";
 
 export default function Home() {
 	const {
@@ -108,8 +108,6 @@ export default function Home() {
 		win.focus();
 	};
 
-	// console.log(isUsersWalletConnected, connectedWallets, "WALLET CONNECTED");
-
 	return (
 		<div className="bg-black min-h-screen relative text-white">
 			<Head>
@@ -117,32 +115,53 @@ export default function Home() {
 				<meta name="description" content="Phit Nfts" />
 				<link rel="icon" href="/favicon.ico" />
 			</Head>
-			<div>
+			<Particles />
+			<div className="relative z-10 h-screen flex flex-col items-center justify-center text-center">
 				<FullLoader
 					isCheckingProvider={isCheckingProvider}
 					isStartingPresale={isStartingPresale}
 					isMintingNft={isMintingNft}
 				/>
-				<div>
-					<h1>Welcome to Phit Nfts!</h1>
-					<div>Its an NFT collection.</div>
-					{isUsersWalletConnected && <div>{tokenIdsMinted}/5 have been minted</div>}
-					<CallToAction
-						isUsersWalletConnected={isUsersWalletConnected}
-						connectWallet={onConnectWallet}
-						loading={loading}
-						presaleStarted={presaleStarted}
-						presaleEnded={presaleEnded}
-						isOwner={isOwner}
-						startPresale={startPresale}
-						presaleMint={presaleMint}
-						publicMint={publicMint}
-						usersTokenId={usersTokenId}
-						generateLinkFromTokenId={generateLinkFromTokenId}
-					/>
-
-					{connectedWallets.length > 0 && <p>Connected Wallet: {connectedWallets[0]}</p>}
+				<h1 className="text-[12vw] font-druk leading-[0.8em] mb-6">Phit NFTS</h1>
+				<div className="text-base md:text-[1.5vw] mb-6">
+					An NFT collection of{" "}
+					<a href="https://www.davidobodo.com/" target="_blank" className="underline">
+						David Obodo
+					</a>
 				</div>
+				{isUsersWalletConnected && (
+					<div className="text-base md:text-[1.5vw] mb-6">{tokenIdsMinted}/5 have been minted</div>
+				)}
+				<CallToAction
+					isUsersWalletConnected={isUsersWalletConnected}
+					connectWallet={onConnectWallet}
+					loading={loading}
+					presaleStarted={presaleStarted}
+					presaleEnded={presaleEnded}
+					isOwner={isOwner}
+					startPresale={startPresale}
+					presaleMint={presaleMint}
+					publicMint={publicMint}
+					usersTokenId={usersTokenId}
+					generateLinkFromTokenId={generateLinkFromTokenId}
+				/>
+
+				{connectedWallets.length > 0 && (
+					<p className="absolute top-[10px] translate-x-[-50%] left-[50%] ">Connected Wallet: {connectedWallets[0]}</p>
+				)}
+
+				<p className="text-white text-base absolute bottom-[10px] px-4">
+					NOTE: This project is a "modified clone" of &nbsp;
+					<a href="https://github.com/LearnWeb3DAO/Whitelist-Dapp" target="_blank" className="underline">
+						LearnWeb3 Whitelist Dapp
+					</a>
+					,&nbsp; as one of the best ways to ensure knowledge sticks is to modify a tutorial. <br /> 5000 thumbs up 👍🏾
+					to{" "}
+					<a href="https://learnweb3.io/" target="_blank" className="underline">
+						LearnWeb3
+					</a>{" "}
+					for making learning web3 easy
+				</p>
 			</div>
 		</div>
 	);
